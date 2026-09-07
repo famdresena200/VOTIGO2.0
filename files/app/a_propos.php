@@ -11,13 +11,13 @@ $userInfo = [];
 
 // Get user details if logged in
 if ($idUser > 0) {
-    $stmt = $pdo->prepare('SELECT nom, email, prenom, nen, cin, telephone, date_naissance, date_inscription FROM USERS WHERE id_user = :id LIMIT 1');
+    $stmt = $pdo->prepare('SELECT nom, email, prenom, nen, cin, telephone, date_naissance, date_inscription FROM users WHERE id_user = :id LIMIT 1');
     $stmt->execute([':id' => $idUser]);
     $userInfo = $stmt->fetch() ?? [];
 }
 
-$totalUsers = (int)$pdo->query('SELECT COUNT(*) AS c FROM USERS')->fetch()['c'];
-$totalVotes = (int)$pdo->query('SELECT COUNT(*) AS c FROM VOTES')->fetch()['c'];
+$totalUsers = (int)$pdo->query('SELECT COUNT(*) AS c FROM users')->fetch()['c'];
+$totalVotes = (int)$pdo->query('SELECT COUNT(*) AS c FROM votes')->fetch()['c'];
 
 votigo_layout_start('À propos — VOTIGO', 'about', [
     'userName' => $userName,

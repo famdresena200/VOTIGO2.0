@@ -9,7 +9,7 @@ require __DIR__ . '/files/inscription/_inc/db.php';
 $pdo = db();
 
 // Récupérer les élections terminées
-$elections = $pdo->query("SELECT id_election, titre, date_fin FROM ELECTIONS WHERE date_fin < NOW() ORDER BY date_fin DESC LIMIT 5")->fetchAll();
+$elections = $pdo->query("SELECT id_election, titre, date_fin FROM elections WHERE date_fin < NOW() ORDER BY date_fin DESC LIMIT 5")->fetchAll();
 
 echo '<h1>Élections terminées :</h1>';
 
@@ -23,8 +23,8 @@ if (empty($elections)) {
         // Tester la requête candidats
         try {
             $stmt = $pdo->prepare('SELECT c.id_candidat, c.nom_candidat, c.image_mime, r.nombre_votes, r.pourcentage
-                FROM CANDIDATS c
-                LEFT JOIN RESULTATS r ON c.id_candidat = r.id_candidat AND r.id_election = :e
+                FROM candidats c
+                LEFT JOIN resultats r ON c.id_candidat = r.id_candidat AND r.id_election = :e
                 WHERE c.id_election = :e
                 ORDER BY COALESCE(r.nombre_votes, 0) DESC, c.ordre ASC, c.id_candidat ASC');
             $stmt->execute([':e' => $id]);

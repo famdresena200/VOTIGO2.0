@@ -36,7 +36,7 @@ function is_valid_cin(string $value): bool
 function is_elector_authorized(PDO $pdo, string $cin, string $nen, string $nom, string $prenom): bool
 {
     $stmt = $pdo->prepare(
-        'SELECT 1 FROM ELECTEURS_AUTORISES
+        'SELECT 1 FROM electeurs_autorises
          WHERE cin = :cin
            AND nen = :nen
            AND LOWER(TRIM(nom)) = LOWER(TRIM(:nom))
@@ -57,7 +57,7 @@ function is_elector_authorized(PDO $pdo, string $cin, string $nen, string $nom, 
 function find_authorized_match(PDO $pdo, string $cin, string $nen): ?array
 {
     $stmt = $pdo->prepare(
-        'SELECT nom, prenom, cin, nen FROM ELECTEURS_AUTORISES
+        'SELECT nom, prenom, cin, nen FROM electeurs_autorises
          WHERE cin = :cin OR nen = :nen
          LIMIT 1'
     );
@@ -80,17 +80,17 @@ if (($_GET['action'] ?? '') === 'check_unique') {
     
     if ($type === 'email' && $value !== '') {
         $pdo = db();
-        $stmt = $pdo->prepare('SELECT COUNT(*) FROM USERS WHERE email = ?');
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE email = ?');
         $stmt->execute([$value]);
         $exists = $stmt->fetchColumn() > 0;
     } elseif ($type === 'nen' && $value !== '') {
         $pdo = db();
-        $stmt = $pdo->prepare('SELECT COUNT(*) FROM USERS WHERE nen = ?');
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE nen = ?');
         $stmt->execute([$value]);
         $exists = $stmt->fetchColumn() > 0;
     } elseif ($type === 'cin' && $value !== '') {
         $pdo = db();
-        $stmt = $pdo->prepare('SELECT COUNT(*) FROM USERS WHERE cin = ?');
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE cin = ?');
         $stmt->execute([$value]);
         $exists = $stmt->fetchColumn() > 0;
     }
@@ -136,25 +136,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } else {
                 // Check if email already exists
-                $stmt = $pdo->prepare("SELECT COUNT(*) FROM USERS WHERE email = ?");
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
                 $stmt->execute([$email]);
                 if ($stmt->fetchColumn() > 0) {
                     $error = "Cet email est déjà utilisé.";
                 } else {
                     // Check if nen already exists
-                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM USERS WHERE nen = ?");
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE nen = ?");
                     $stmt->execute([$nen]);
                     if ($stmt->fetchColumn() > 0) {
                         $error = "Ce numéro d’électeur est déjà utilisé.";
                     } else {
                         // Check if cin already exists
-                        $stmt = $pdo->prepare("SELECT COUNT(*) FROM USERS WHERE cin = ?");
+                        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE cin = ?");
                         $stmt->execute([$cin]);
                         if ($stmt->fetchColumn() > 0) {
                             $error = "Ce numéro CIN est déjà utilisé.";
                         } else {
                             // Insert user without password
-                            $stmt = $pdo->prepare("INSERT INTO USERS (nom, prenom, email, nen, cin, telephone, date_naissance) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                            $stmt = $pdo->prepare("INSERT INTO users (nom, prenom, email, nen, cin, telephone, date_naissance) VALUES (?, ?, ?, ?, ?, ?, ?)");
                             $stmt->execute([$nom, $prenom, $email, $nen, $cin, $telephone, $date_naissance]);
                             $user_id = $pdo->lastInsertId();
                             $_SESSION['user_id'] = $user_id;

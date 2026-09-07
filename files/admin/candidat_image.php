@@ -12,7 +12,7 @@ if ($id <= 0) {
 
 try {
     $pdo = db();
-    $stmt = $pdo->prepare('SELECT image_mime, image_data FROM CANDIDATS WHERE id_candidat = :id LIMIT 1');
+    $stmt = $pdo->prepare('SELECT image_mime, image_data FROM candidats WHERE id_candidat = :id LIMIT 1');
     $stmt->execute([':id' => $id]);
     $row = $stmt->fetch();
     if (!$row || empty($row['image_mime']) || empty($row['image_data'])) {

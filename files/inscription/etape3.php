@@ -24,11 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hash = password_hash($password, PASSWORD_DEFAULT);
         try {
             $pdo = db();
-            $stmt = $pdo->prepare("UPDATE USERS SET password_hash = ? WHERE id_user = ?");
+            $stmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id_user = ?");
             $stmt->execute([$hash, $_SESSION['user_id']]);
             
             // Get user info to login
-            $stmt = $pdo->prepare("SELECT id_user, nom FROM USERS WHERE id_user = ?");
+            $stmt = $pdo->prepare("SELECT id_user, nom FROM users WHERE id_user = ?");
             $stmt->execute([$_SESSION['user_id']]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Get user info from database
 try {
     $pdo = db();
-    $stmt = $pdo->prepare("SELECT id_user, nom, prenom, email FROM USERS WHERE id_user = ?");
+    $stmt = $pdo->prepare("SELECT id_user, nom, prenom, email FROM users WHERE id_user = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     

@@ -24,7 +24,7 @@ $sort = $_GET['sort'] ?? 'date'; // date, votes
 $idElection = (int)($_GET['id_election'] ?? 0);
 
 if ($idElection > 0) {
-    $stmt = $pdo->prepare('SELECT * FROM ELECTIONS WHERE id_election = :id');
+    $stmt = $pdo->prepare('SELECT * FROM elections WHERE id_election = :id');
     $stmt->execute([':id' => $idElection]);
     $election = $stmt->fetch();
 
@@ -61,25 +61,25 @@ if ($idElection > 0) {
 
     // Calculer les résultats
     try {
-        $stmt = $pdo->prepare('SELECT COUNT(*) as cnt FROM RESULTATS WHERE id_election = :e');
+        $stmt = $pdo->prepare('SELECT COUNT(*) as cnt FROM resultats WHERE id_election = :e');
         $stmt->execute([':e' => $idElection]);
         $row = $stmt->fetch();
         
         if (!$row || (int)$row['cnt'] == 0) {
-            $stmt = $pdo->prepare('INSERT INTO RESULTATS (id_election, id_candidat, nombre_votes, pourcentage) 
+            $stmt = $pdo->prepare('INSERT INTO resultats (id_election, id_candidat, nombre_votes, pourcentage) 
                 SELECT :eid, c.id_candidat, COALESCE(COUNT(v.id_vote),0), 0 
-                FROM CANDIDATS c LEFT JOIN VOTES v ON c.id_candidat=v.id_candidat AND v.id_election=:eid2 
+                FROM candidats c LEFT JOIN votes v ON c.id_candidat=v.id_candidat AND v.id_election=:eid2 
                 WHERE c.id_election=:eid3 GROUP BY c.id_candidat');
             $stmt->execute([':eid' => $idElection, ':eid2' => $idElection, ':eid3' => $idElection]);
         }
 
-        $stmt = $pdo->prepare('SELECT SUM(nombre_votes) as tot FROM RESULTATS WHERE id_election=:e');
+        $stmt = $pdo->prepare('SELECT SUM(nombre_votes) as tot FROM resultats WHERE id_election=:e');
         $stmt->execute([':e' => $idElection]);
         $row = $stmt->fetch();
         $total = ($row && $row['tot']) ? (int)$row['tot'] : 0;
 
         if ($total > 0) {
-            $stmt = $pdo->prepare('UPDATE RESULTATS SET pourcentage=ROUND((nombre_votes/:total)*100,2) WHERE id_election=:e');
+            $stmt = $pdo->prepare('UPDATE resultats SET pourcentage=ROUND((nombre_votes/:total)*100,2) WHERE id_election=:e');
             $stmt->execute([':total' => $total, ':e' => $idElection]);
         }
     } catch (Exception $ex) {
@@ -88,7 +88,7 @@ if ($idElection > 0) {
 
     // Vérifier si l'utilisateur a voté et récupérer son choix
     $userVote = null;
-    $stmt = $pdo->prepare('SELECT id_candidat FROM VOTES WHERE id_election = :e AND id_user = :u LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id_candidat FROM votes WHERE id_election = :e AND id_user = :u LIMIT 1');
     $stmt->execute([':e' => $idElection, ':u' => $idUser]);
     $voteRow = $stmt->fetch();
     if ($voteRow) {
@@ -97,7 +97,7 @@ if ($idElection > 0) {
 
     // Récupérer candidats avec résultats
     $stmt = $pdo->prepare('SELECT c.id_candidat, c.nom_candidat, COALESCE(r.nombre_votes, 0) as votes, COALESCE(r.pourcentage, 0) as pct
-        FROM CANDIDATS c LEFT JOIN RESULTATS r ON c.id_candidat = r.id_candidat
+        FROM candidats c LEFT JOIN resultats r ON c.id_candidat = r.id_candidat
         WHERE c.id_election = :e
         ORDER BY COALESCE(r.nombre_votes, 0) DESC');
     $stmt->execute([':e' => $idElection]);
@@ -116,7 +116,7 @@ if ($idElection > 0) {
     echo '<div style="margin-bottom:24px;padding:16px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid rgba(255,255,255,.05)">';
     if ($userVote) {
         // Récupérer le nom du candidat choisi
-        $stmt = $pdo->prepare('SELECT nom_candidat FROM CANDIDATS WHERE id_candidat = :id');
+        $stmt = $pdo->prepare('SELECT nom_candidat FROM candidats WHERE id_candidat = :id');
         $stmt->execute([':id' => $userVote]);
         $chosenCandidate = $stmt->fetch();
         echo '<div style="display:flex;align-items:center;gap:8px">';
@@ -208,7 +208,7 @@ if ($idElection > 0) {
 }
 
 // Page d'accueil - liste des élections avec filtres
-$query = 'SELECT e.*, COALESCE(SUM(r.nombre_votes), 0) as total_votes FROM ELECTIONS e LEFT JOIN RESULTATS r ON e.id_election = r.id_election';
+$query = 'SELECT e.*, COALESCE(SUM(r.nombre_votes), 0) as total_votes FROM elections e LEFT JOIN resultats r ON e.id_election = r.id_election';
 $conditions = [];
 $params = [];
 
@@ -322,7 +322,7 @@ if (empty($elections)) {
         }
 
         // Vérifier si l'utilisateur a voté
-        $stmt = $pdo->prepare('SELECT COUNT(*) as has_voted FROM VOTES WHERE id_election = :e AND id_user = :u');
+        $stmt = $pdo->prepare('SELECT COUNT(*) as has_voted FROM votes WHERE id_election = :e AND id_user = :u');
         $stmt->execute([':e' => $e['id_election'], ':u' => $idUser]);
         $hasVoted = (bool)$stmt->fetch()['has_voted'];
 

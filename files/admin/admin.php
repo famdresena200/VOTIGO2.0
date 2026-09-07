@@ -32,9 +32,9 @@ function db_has_columns(PDO $pdo, string $table, array $cols): bool
     }
 }
 
-$hasOrdre = db_has_columns($pdo, 'CANDIDATS', ['ordre']);
-$hasImageCols = db_has_columns($pdo, 'CANDIDATS', ['image_filename', 'image_mime', 'image_size', 'image_data']);
-$hasNumero = db_has_columns($pdo, 'CANDIDATS', ['numero']);
+$hasOrdre = db_has_columns($pdo, 'candidats', ['ordre']);
+$hasImageCols = db_has_columns($pdo, 'candidats', ['image_filename', 'image_mime', 'image_size', 'image_data']);
+$hasNumero = db_has_columns($pdo, 'candidats', ['numero']);
 $maxImageBytes = 10_000_000; // 10 MB
 
 function normalize_datetime_local(string $value): string
@@ -59,13 +59,13 @@ if (($_POST['action'] ?? '') === 'check_unique') {
     $value = trim($_POST['value'] ?? '');
     $exists = false;
     if ($type === 'nom' && $idElection > 0 && $value !== '') {
-        $stmt = $pdo->prepare('SELECT COUNT(*) AS c FROM CANDIDATS WHERE id_election = ? AND nom_candidat = ?');
+        $stmt = $pdo->prepare('SELECT COUNT(*) AS c FROM candidats WHERE id_election = ? AND nom_candidat = ?');
         $stmt->execute([$idElection, $value]);
         $exists = (int)$stmt->fetch()['c'] > 0;
     } elseif ($type === 'numero' && $hasNumero && $idElection > 0 && $value !== '') {
         $numeroVal = (int)$value;
         if ($numeroVal > 0) {
-            $stmt = $pdo->prepare('SELECT COUNT(*) AS c FROM CANDIDATS WHERE id_election = ? AND numero = ?');
+            $stmt = $pdo->prepare('SELECT COUNT(*) AS c FROM candidats WHERE id_election = ? AND numero = ?');
             $stmt->execute([$idElection, $numeroVal]);
             $exists = (int)$stmt->fetch()['c'] > 0;
         }
@@ -82,7 +82,7 @@ if (($_POST['action'] ?? '') === 'delete_candidat') {
         $error = "Action invalide.";
     } else {
         try {
-            $stmt = $pdo->prepare('DELETE FROM CANDIDATS WHERE id_candidat = :c AND id_election = :e');
+            $stmt = $pdo->prepare('DELETE FROM candidats WHERE id_candidat = :c AND id_election = :e');
             $stmt->execute([':c' => $idCandidat, ':e' => $idElection]);
             header('Location: admin.php?e=' . $idElection . '#bulletin');
             exit;
@@ -105,7 +105,7 @@ if (($_POST['action'] ?? '') === 'update_candidat') {
     } else {
         try {
             // Vérifier l'unicité du nom du candidat par élection (en excluant le candidat actuel)
-            $stmtName = $pdo->prepare('SELECT COUNT(*) AS c FROM CANDIDATS WHERE id_election = :e AND nom_candidat = :n AND id_candidat != :c');
+            $stmtName = $pdo->prepare('SELECT COUNT(*) AS c FROM candidats WHERE id_election = :e AND nom_candidat = :n AND id_candidat != :c');
             $stmtName->execute([':e' => $idElection, ':n' => $nomCandidat, ':c' => $idCandidat]);
             if ((int)$stmtName->fetch()['c'] > 0) {
                 throw new RuntimeException("Un candidat avec ce nom existe déjà pour cette élection.");
@@ -149,7 +149,7 @@ if (($_POST['action'] ?? '') === 'update_candidat') {
 
             if ($removeImage && !$hasNewImage) {
                 $stmt = $pdo->prepare(
-                    'UPDATE CANDIDATS
+                    'UPDATE candidats
                      SET nom_candidat = :n, bio = :b,
                          image_filename = NULL, image_mime = NULL, image_size = NULL, image_data = NULL
                      WHERE id_candidat = :c AND id_election = :e'
@@ -157,7 +157,7 @@ if (($_POST['action'] ?? '') === 'update_candidat') {
                 $stmt->execute([':n' => $nomCandidat, ':b' => $bio !== '' ? $bio : null, ':c' => $idCandidat, ':e' => $idElection]);
             } elseif ($hasNewImage) {
                 $stmt = $pdo->prepare(
-                    'UPDATE CANDIDATS
+                    'UPDATE candidats
                      SET nom_candidat = :n, bio = :b,
                          image_filename = :fn, image_mime = :mime, image_size = :size, image_data = :data
                      WHERE id_candidat = :c AND id_election = :e'
@@ -173,7 +173,7 @@ if (($_POST['action'] ?? '') === 'update_candidat') {
                     ':e' => $idElection,
                 ]);
             } else {
-                $stmt = $pdo->prepare('UPDATE CANDIDATS SET nom_candidat = :n, bio = :b WHERE id_candidat = :c AND id_election = :e');
+                $stmt = $pdo->prepare('UPDATE candidats SET nom_candidat = :n, bio = :b WHERE id_candidat = :c AND id_election = :e');
                 $stmt->execute([':n' => $nomCandidat, ':b' => $bio !== '' ? $bio : null, ':c' => $idCandidat, ':e' => $idElection]);
             }
 
@@ -202,14 +202,14 @@ if (($_POST['action'] ?? '') === 'reorder_candidats') {
                 $pdo->beginTransaction();
                 // Vérifie que les IDs appartiennent bien à l'élection
                 $in = implode(',', array_fill(0, count($ids), '?'));
-                $stmt = $pdo->prepare("SELECT COUNT(*) AS c FROM CANDIDATS WHERE id_election = ? AND id_candidat IN ($in)");
+                $stmt = $pdo->prepare("SELECT COUNT(*) AS c FROM candidats WHERE id_election = ? AND id_candidat IN ($in)");
                 $stmt->execute(array_merge([$idElection], $ids));
                 $count = (int)$stmt->fetch()['c'];
                 if ($count !== count($ids)) {
                     throw new RuntimeException("Ordre invalide.");
                 }
 
-                $stmt = $pdo->prepare('UPDATE CANDIDATS SET ordre = :o WHERE id_election = :e AND id_candidat = :c');
+                $stmt = $pdo->prepare('UPDATE candidats SET ordre = :o WHERE id_election = :e AND id_candidat = :c');
                 $o = 1;
                 foreach ($ids as $cid) {
                     $stmt->execute([':o' => $o, ':e' => $idElection, ':c' => $cid]);
@@ -236,7 +236,7 @@ if (($_POST['action'] ?? '') === 'set_status') {
         $error = "Action invalide.";
     } else {
         try {
-            $stmt = $pdo->prepare('UPDATE ELECTIONS SET statut = :s WHERE id_election = :id');
+            $stmt = $pdo->prepare('UPDATE elections SET statut = :s WHERE id_election = :id');
             $stmt->execute([':s' => $statut, ':id' => $idElection]);
             $info = "Statut de l'élection mis à jour.";
         } catch (PDOException $e) {
@@ -257,7 +257,7 @@ if (($_POST['action'] ?? '') === 'add_election') {
         $error = "Veuillez remplir les champs obligatoires de l'élection.";
     } else {
         try {
-            $stmt = $pdo->prepare('INSERT INTO ELECTIONS (titre, description, date_debut, date_fin, statut) VALUES (:t, :d, :dd, :df, :s)');
+            $stmt = $pdo->prepare('INSERT INTO elections (titre, description, date_debut, date_fin, statut) VALUES (:t, :d, :dd, :df, :s)');
             $stmt->execute([
                 ':t' => $titre,
                 ':d' => $description !== '' ? $description : null,
@@ -293,7 +293,7 @@ if (($_POST['action'] ?? '') === 'add_candidat') {
                 throw new RuntimeException("Numéro invalide (doit être > 0).");
             }
             if ($hasNumero && $numeroVal !== null) {
-                $stmtN = $pdo->prepare('SELECT COUNT(*) AS c FROM CANDIDATS WHERE id_election = :e AND numero = :n');
+                $stmtN = $pdo->prepare('SELECT COUNT(*) AS c FROM candidats WHERE id_election = :e AND numero = :n');
                 $stmtN->execute([':e' => $idElection, ':n' => $numeroVal]);
                 if ((int)($stmtN->fetch()['c'] ?? 0) > 0) {
                     throw new RuntimeException("Ce numéro est déjà utilisé pour cette élection.");
@@ -301,7 +301,7 @@ if (($_POST['action'] ?? '') === 'add_candidat') {
             }
 
             // Vérifier l'unicité du nom du candidat par élection
-            $stmtName = $pdo->prepare('SELECT COUNT(*) AS c FROM CANDIDATS WHERE id_election = :e AND nom_candidat = :n');
+            $stmtName = $pdo->prepare('SELECT COUNT(*) AS c FROM candidats WHERE id_election = :e AND nom_candidat = :n');
             $stmtName->execute([':e' => $idElection, ':n' => $nomCandidat]);
             if ((int)$stmtName->fetch()['c'] > 0) {
                 throw new RuntimeException("Un candidat avec ce nom existe déjà pour cette élection.");
@@ -344,14 +344,14 @@ if (($_POST['action'] ?? '') === 'add_candidat') {
 
             $ordre = 0;
             if ($hasOrdre) {
-                $stmtOrd = $pdo->prepare('SELECT COALESCE(MAX(ordre), 0) AS m FROM CANDIDATS WHERE id_election = :e');
+                $stmtOrd = $pdo->prepare('SELECT COALESCE(MAX(ordre), 0) AS m FROM candidats WHERE id_election = :e');
                 $stmtOrd->execute([':e' => $idElection]);
                 $ordre = (int)($stmtOrd->fetch()['m'] ?? 0) + 1;
             }
 
             if ($hasOrdre && $hasImageCols && $hasNumero) {
                 $stmt = $pdo->prepare(
-                    'INSERT INTO CANDIDATS (id_election, nom_candidat, bio, numero, ordre, image_filename, image_mime, image_size, image_data)
+                    'INSERT INTO candidats (id_election, nom_candidat, bio, numero, ordre, image_filename, image_mime, image_size, image_data)
                      VALUES (:e, :n, :b, :num, :o, :fn, :mime, :size, :data)'
                 );
                 $stmt->execute([
@@ -367,7 +367,7 @@ if (($_POST['action'] ?? '') === 'add_candidat') {
                 ]);
             } elseif ($hasOrdre && $hasImageCols && !$hasNumero) {
                 $stmt = $pdo->prepare(
-                    'INSERT INTO CANDIDATS (id_election, nom_candidat, bio, ordre, image_filename, image_mime, image_size, image_data)
+                    'INSERT INTO candidats (id_election, nom_candidat, bio, ordre, image_filename, image_mime, image_size, image_data)
                      VALUES (:e, :n, :b, :o, :fn, :mime, :size, :data)'
                 );
                 $stmt->execute([
@@ -382,7 +382,7 @@ if (($_POST['action'] ?? '') === 'add_candidat') {
                 ]);
             } elseif ($hasOrdre && !$hasImageCols && $hasNumero) {
                 $stmt = $pdo->prepare(
-                    'INSERT INTO CANDIDATS (id_election, nom_candidat, bio, numero, ordre)
+                    'INSERT INTO candidats (id_election, nom_candidat, bio, numero, ordre)
                      VALUES (:e, :n, :b, :num, :o)'
                 );
                 $stmt->execute([
@@ -394,7 +394,7 @@ if (($_POST['action'] ?? '') === 'add_candidat') {
                 ]);
             } elseif ($hasOrdre && !$hasImageCols && !$hasNumero) {
                 $stmt = $pdo->prepare(
-                    'INSERT INTO CANDIDATS (id_election, nom_candidat, bio, ordre)
+                    'INSERT INTO candidats (id_election, nom_candidat, bio, ordre)
                      VALUES (:e, :n, :b, :o)'
                 );
                 $stmt->execute([
@@ -405,7 +405,7 @@ if (($_POST['action'] ?? '') === 'add_candidat') {
                 ]);
             } elseif (!$hasOrdre && $hasImageCols && $hasNumero) {
                 $stmt = $pdo->prepare(
-                    'INSERT INTO CANDIDATS (id_election, nom_candidat, bio, numero, image_filename, image_mime, image_size, image_data)
+                    'INSERT INTO candidats (id_election, nom_candidat, bio, numero, image_filename, image_mime, image_size, image_data)
                      VALUES (:e, :n, :b, :num, :fn, :mime, :size, :data)'
                 );
                 $stmt->execute([
@@ -420,7 +420,7 @@ if (($_POST['action'] ?? '') === 'add_candidat') {
                 ]);
             } elseif (!$hasOrdre && $hasImageCols && !$hasNumero) {
                 $stmt = $pdo->prepare(
-                    'INSERT INTO CANDIDATS (id_election, nom_candidat, bio, image_filename, image_mime, image_size, image_data)
+                    'INSERT INTO candidats (id_election, nom_candidat, bio, image_filename, image_mime, image_size, image_data)
                      VALUES (:e, :n, :b, :fn, :mime, :size, :data)'
                 );
                 $stmt->execute([
@@ -434,7 +434,7 @@ if (($_POST['action'] ?? '') === 'add_candidat') {
                 ]);
             } elseif (!$hasOrdre && !$hasImageCols && $hasNumero) {
                 $stmt = $pdo->prepare(
-                    'INSERT INTO CANDIDATS (id_election, nom_candidat, bio, numero)
+                    'INSERT INTO candidats (id_election, nom_candidat, bio, numero)
                      VALUES (:e, :n, :b, :num)'
                 );
                 $stmt->execute([
@@ -445,7 +445,7 @@ if (($_POST['action'] ?? '') === 'add_candidat') {
                 ]);
             } else {
                 $stmt = $pdo->prepare(
-                    'INSERT INTO CANDIDATS (id_election, nom_candidat, bio)
+                    'INSERT INTO candidats (id_election, nom_candidat, bio)
                      VALUES (:e, :n, :b)'
                 );
                 $stmt->execute([
@@ -473,7 +473,7 @@ $perPageE = 15;
 $offsetE = ($pe - 1) * $perPageE;
 
 // Pagination + recherche élections
-$totalElections = (int)$pdo->query('SELECT COUNT(*) AS c FROM ELECTIONS')->fetch()['c'];
+$totalElections = (int)$pdo->query('SELECT COUNT(*) AS c FROM elections')->fetch()['c'];
 $whereE = [];
 $paramsE = [];
 if ($qe !== '') {
@@ -486,7 +486,7 @@ if ($es !== '') {
 }
 $whereSqlE = empty($whereE) ? '' : ('WHERE ' . implode(' AND ', $whereE));
 
-$stmt = $pdo->prepare("SELECT COUNT(*) AS c FROM ELECTIONS $whereSqlE");
+$stmt = $pdo->prepare("SELECT COUNT(*) AS c FROM elections $whereSqlE");
 $stmt->execute($paramsE);
 $filteredElections = (int)$stmt->fetch()['c'];
 
@@ -503,7 +503,7 @@ if ($sortE === 'fin_desc') $orderSqlE = 'date_fin DESC, id_election DESC';
 if ($sortE === 'debut_asc') $orderSqlE = 'date_debut ASC, id_election ASC';
 if ($sortE === 'fin_asc') $orderSqlE = 'date_fin ASC, id_election ASC';
 
-$stmt = $pdo->prepare("SELECT id_election, titre, statut, date_debut, date_fin FROM ELECTIONS $whereSqlE ORDER BY $orderSqlE LIMIT $limitE OFFSET $offE");
+$stmt = $pdo->prepare("SELECT id_election, titre, statut, date_debut, date_fin FROM elections $whereSqlE ORDER BY $orderSqlE LIMIT $limitE OFFSET $offE");
 $stmt->execute($paramsE);
 $elections = $stmt->fetchAll();
 $selectedElectionId = $selectedElectionId > 0 ? $selectedElectionId : (int)($elections[0]['id_election'] ?? 0);
@@ -512,9 +512,9 @@ $candidats = [];
 if ($selectedElectionId > 0) {
     try {
         if ($hasOrdre) {
-            $stmt = $pdo->prepare('SELECT id_candidat, nom_candidat, bio, ordre, image_mime FROM CANDIDATS WHERE id_election = :e ORDER BY ordre ASC, id_candidat ASC');
+            $stmt = $pdo->prepare('SELECT id_candidat, nom_candidat, bio, ordre, image_mime FROM candidats WHERE id_election = :e ORDER BY ordre ASC, id_candidat ASC');
         } else {
-            $stmt = $pdo->prepare('SELECT id_candidat, nom_candidat, bio, image_mime FROM CANDIDATS WHERE id_election = :e ORDER BY id_candidat ASC');
+            $stmt = $pdo->prepare('SELECT id_candidat, nom_candidat, bio, image_mime FROM candidats WHERE id_election = :e ORDER BY id_candidat ASC');
         }
         $stmt->execute([':e' => $selectedElectionId]);
         $candidats = $stmt->fetchAll();
@@ -533,9 +533,9 @@ $perPage = 25;
 $offset = ($page - 1) * $perPage;
 
 // Compteurs + pagination scalable
-$totalUsers = (int)$pdo->query('SELECT COUNT(*) AS c FROM USERS')->fetch()['c'];
+$totalUsers = (int)$pdo->query('SELECT COUNT(*) AS c FROM users')->fetch()['c'];
 if ($q !== '') {
-    $stmt = $pdo->prepare('SELECT COUNT(*) AS c FROM USERS WHERE nom LIKE :q OR email LIKE :q');
+    $stmt = $pdo->prepare('SELECT COUNT(*) AS c FROM users WHERE nom LIKE :q OR email LIKE :q');
     $stmt->execute([':q' => '%' . $q . '%']);
     $filteredUsers = (int)$stmt->fetch()['c'];
 } else {
@@ -554,13 +554,13 @@ if ($us === 'date_asc') $orderU = 'date_inscription ASC, id_user ASC';
 if ($q !== '') {
     $limitU = (int)$perPage;
     $offU = (int)$offset;
-    $stmt = $pdo->prepare("SELECT id_user, nom, email, date_inscription FROM USERS WHERE nom LIKE :q OR email LIKE :q ORDER BY $orderU LIMIT $limitU OFFSET $offU");
+    $stmt = $pdo->prepare("SELECT id_user, nom, email, date_inscription FROM users WHERE nom LIKE :q OR email LIKE :q ORDER BY $orderU LIMIT $limitU OFFSET $offU");
     $stmt->execute([':q' => '%' . $q . '%']);
     $users = $stmt->fetchAll();
 } else {
     $limitU = (int)$perPage;
     $offU = (int)$offset;
-    $users = $pdo->query("SELECT id_user, nom, email, date_inscription FROM USERS ORDER BY $orderU LIMIT $limitU OFFSET $offU")->fetchAll();
+    $users = $pdo->query("SELECT id_user, nom, email, date_inscription FROM users ORDER BY $orderU LIMIT $limitU OFFSET $offU")->fetchAll();
 }
 
 ?>

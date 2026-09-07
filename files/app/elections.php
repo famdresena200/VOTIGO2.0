@@ -20,12 +20,12 @@ require_electeur();
 $userName = auth_user_name();
 $idUser = auth_user_id();
 
-$elections = $pdo->query("SELECT id_election, titre, description, date_debut, date_fin, statut FROM ELECTIONS ORDER BY statut='actif' DESC, date_debut DESC")->fetchAll();
+$elections = $pdo->query("SELECT id_election, titre, description, date_debut, date_fin, statut FROM elections ORDER BY statut='actif' DESC, date_debut DESC")->fetchAll();
 
 // Check which elections the user has already voted in
 $votedElections = [];
 if ($idUser > 0) {
-    $stmt = $pdo->prepare('SELECT DISTINCT id_election FROM VOTES WHERE token_anonyme = ?');
+    $stmt = $pdo->prepare('SELECT DISTINCT id_election FROM votes WHERE token_anonyme = ?');
     foreach ($elections as $e) {
         $token = anon_token($idUser, (int)$e['id_election']);
         $stmt->execute([$token]);

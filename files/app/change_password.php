@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Verify current password
         $pdo = db();
-        $stmt = $pdo->prepare('SELECT password_hash FROM USERS WHERE id_user = :id LIMIT 1');
+        $stmt = $pdo->prepare('SELECT password_hash FROM users WHERE id_user = :id LIMIT 1');
         $stmt->execute([':id' => $idUser]);
         $user = $stmt->fetch();
 
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Update password
             try {
                 $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare('UPDATE USERS SET password_hash = :hash WHERE id_user = :id');
+                $stmt = $pdo->prepare('UPDATE users SET password_hash = :hash WHERE id_user = :id');
                 $stmt->execute([':hash' => $newHash, ':id' => $idUser]);
                 $success = true;
             } catch (PDOException $e) {

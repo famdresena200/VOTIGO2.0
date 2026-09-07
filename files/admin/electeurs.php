@@ -24,9 +24,9 @@ $perPage = 25;
 $offset = ($page - 1) * $perPage;
 
 // Compteurs + pagination
-$totalUsers = (int)$pdo->query('SELECT COUNT(*) AS c FROM USERS')->fetch()['c'];
+$totalUsers = (int)$pdo->query('SELECT COUNT(*) AS c FROM users')->fetch()['c'];
 if ($q !== '') {
-    $stmt = $pdo->prepare('SELECT COUNT(*) AS c FROM USERS WHERE nom LIKE :q OR email LIKE :q');
+    $stmt = $pdo->prepare('SELECT COUNT(*) AS c FROM users WHERE nom LIKE :q OR email LIKE :q');
     $stmt->execute([':q' => '%' . $q . '%']);
     $filteredUsers = (int)$stmt->fetch()['c'];
 } else {
@@ -45,11 +45,11 @@ if ($us === 'date_asc') $orderU = 'date_inscription ASC, id_user ASC';
 $limitU = (int)$perPage;
 $offU = (int)$offset;
 if ($q !== '') {
-    $stmt = $pdo->prepare("SELECT id_user, nom, email, date_inscription FROM USERS WHERE nom LIKE :q OR email LIKE :q ORDER BY $orderU LIMIT $limitU OFFSET $offU");
+    $stmt = $pdo->prepare("SELECT id_user, nom, email, date_inscription FROM users WHERE nom LIKE :q OR email LIKE :q ORDER BY $orderU LIMIT $limitU OFFSET $offU");
     $stmt->execute([':q' => '%' . $q . '%']);
     $users = $stmt->fetchAll();
 } else {
-    $users = $pdo->query("SELECT id_user, nom, email, date_inscription FROM USERS ORDER BY $orderU LIMIT $limitU OFFSET $offU")->fetchAll();
+    $users = $pdo->query("SELECT id_user, nom, email, date_inscription FROM users ORDER BY $orderU LIMIT $limitU OFFSET $offU")->fetchAll();
 }
 
 votigo_layout_start('Électeurs — Administration — VOTIGO', 'admin', [

@@ -6,8 +6,8 @@ require __DIR__ . '/../_inc/auth.php';
 
 $pdo = db();
 $userName = auth_user_name();
-$totalVotes = (int)$pdo->query('SELECT COUNT(*) AS c FROM VOTES')->fetch()['c'];
-$totalElections = (int)$pdo->query('SELECT COUNT(*) AS c FROM ELECTIONS')->fetch()['c'];
+$totalVotes = (int)$pdo->query('SELECT COUNT(*) AS c FROM votes')->fetch()['c'];
+$totalElections = (int)$pdo->query('SELECT COUNT(*) AS c FROM elections')->fetch()['c'];
 
 votigo_layout_start('Transparence & Audit — VOTIGO', 'audit', [
     'userName' => $userName,
@@ -80,7 +80,7 @@ votigo_layout_start('Transparence & Audit — VOTIGO', 'audit', [
       </div>
       <div class="mini">
         <div class="t">Transparence</div>
-        <div class="s">Résultats agrégés par candidat (table RESULTATS) pour accélérer l’affichage et simplifier la vérification</div>
+        <div class="s">Résultats agrégés par candidat (table resultats) pour accélérer l’affichage et simplifier la vérification</div>
       </div>
     </div>
   </div>

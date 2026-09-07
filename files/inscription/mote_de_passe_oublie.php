@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     try {
         $pdo = db();
-        $stmt = $pdo->prepare("SELECT id_user, nom, prenom FROM USERS WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT id_user, nom, prenom FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 

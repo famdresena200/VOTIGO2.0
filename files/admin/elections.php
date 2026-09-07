@@ -37,7 +37,7 @@ if (($_POST['action'] ?? '') === 'set_status') {
         $error = "Action invalide.";
     } else {
         try {
-            $stmt = $pdo->prepare('UPDATE ELECTIONS SET statut = :s WHERE id_election = :id');
+            $stmt = $pdo->prepare('UPDATE elections SET statut = :s WHERE id_election = :id');
             $stmt->execute([':s' => $statut, ':id' => $idElection]);
             $info = "Statut de l'élection mis à jour.";
         } catch (PDOException $e) {
@@ -58,7 +58,7 @@ $pe = max(1, (int)($_GET['pe'] ?? 1));
 $perPageE = 15;
 $offsetE = ($pe - 1) * $perPageE;
 
-$totalElections = (int)$pdo->query('SELECT COUNT(*) AS c FROM ELECTIONS')->fetch()['c'];
+$totalElections = (int)$pdo->query('SELECT COUNT(*) AS c FROM elections')->fetch()['c'];
 $whereE = [];
 $paramsE = [];
 if ($qe !== '') {
@@ -73,7 +73,7 @@ if ($es !== '') {
 }
 $whereSqlE = empty($whereE) ? '' : ('WHERE ' . implode(' AND ', $whereE));
 
-$stmt = $pdo->prepare("SELECT COUNT(*) AS c FROM ELECTIONS $whereSqlE");
+$stmt = $pdo->prepare("SELECT COUNT(*) AS c FROM elections $whereSqlE");
 $stmt->execute($paramsE);
 $filteredElections = (int)$stmt->fetch()['c'];
 
@@ -89,7 +89,7 @@ if ($sortE === 'fin_desc') $orderSqlE = 'date_fin DESC, id_election DESC';
 if ($sortE === 'debut_asc') $orderSqlE = 'date_debut ASC, id_election ASC';
 if ($sortE === 'fin_asc') $orderSqlE = 'date_fin ASC, id_election ASC';
 
-$stmt = $pdo->prepare("SELECT id_election, titre, statut, date_debut, date_fin FROM ELECTIONS $whereSqlE ORDER BY $orderSqlE LIMIT $limitE OFFSET $offE");
+$stmt = $pdo->prepare("SELECT id_election, titre, statut, date_debut, date_fin FROM elections $whereSqlE ORDER BY $orderSqlE LIMIT $limitE OFFSET $offE");
 $stmt->execute($paramsE);
 $elections = $stmt->fetchAll();
 

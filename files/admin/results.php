@@ -66,7 +66,7 @@ echo '</div>';
 echo '</div></section>';
 
 // ========== RÉCUPÉRATION DONNÉES ==========
-$stmt = $pdo->query('SELECT * FROM ELECTIONS ORDER BY date_fin DESC');
+$stmt = $pdo->query('SELECT * FROM elections ORDER BY date_fin DESC');
 $elections = $stmt->fetchAll() ?: [];
 
 $now = new DateTime();
@@ -94,7 +94,7 @@ foreach ($elections as $election) {
 if ($sort === 'votes') {
     usort($filtered, function($a, $b) use ($pdo) {
         $getVotes = function($id) use ($pdo) {
-            $stmt = $pdo->prepare('SELECT SUM(nombre_votes) as tot FROM RESULTATS WHERE id_election=:e');
+            $stmt = $pdo->prepare('SELECT SUM(nombre_votes) as tot FROM resultats WHERE id_election=:e');
             $stmt->execute([':e' => (int)$id]);
             $row = $stmt->fetch();
             return ($row && $row['tot']) ? (int)$row['tot'] : 0;
@@ -138,25 +138,25 @@ foreach ($filtered as $item) {
     
     // Calculer résultats
     try {
-        $stmt = $pdo->prepare('SELECT COUNT(*) as cnt FROM RESULTATS WHERE id_election = :e');
+        $stmt = $pdo->prepare('SELECT COUNT(*) as cnt FROM resultats WHERE id_election = :e');
         $stmt->execute([':e' => $idElection]);
         $row = $stmt->fetch();
         
         if (!$row || (int)$row['cnt'] == 0) {
-            $stmt = $pdo->prepare('INSERT INTO RESULTATS (id_election, id_candidat, nombre_votes, pourcentage) 
+            $stmt = $pdo->prepare('INSERT INTO resultats (id_election, id_candidat, nombre_votes, pourcentage) 
                 SELECT :eid, c.id_candidat, COALESCE(COUNT(v.id_vote),0), 0 
-                FROM CANDIDATS c LEFT JOIN VOTES v ON c.id_candidat=v.id_candidat AND v.id_election=:eid2 
+                FROM candidats c LEFT JOIN votes v ON c.id_candidat=v.id_candidat AND v.id_election=:eid2 
                 WHERE c.id_election=:eid3 GROUP BY c.id_candidat');
             $stmt->execute([':eid' => $idElection, ':eid2' => $idElection, ':eid3' => $idElection]);
         }
 
-        $stmt = $pdo->prepare('SELECT SUM(nombre_votes) as tot FROM RESULTATS WHERE id_election=:e');
+        $stmt = $pdo->prepare('SELECT SUM(nombre_votes) as tot FROM resultats WHERE id_election=:e');
         $stmt->execute([':e' => $idElection]);
         $row = $stmt->fetch();
         $total = ($row && $row['tot']) ? (int)$row['tot'] : 0;
 
         if ($total > 0) {
-            $stmt = $pdo->prepare('UPDATE RESULTATS SET pourcentage=ROUND((nombre_votes/:total)*100,2) WHERE id_election=:e');
+            $stmt = $pdo->prepare('UPDATE resultats SET pourcentage=ROUND((nombre_votes/:total)*100,2) WHERE id_election=:e');
             $stmt->execute([':total' => $total, ':e' => $idElection]);
         }
     } catch (Exception $ex) {
@@ -165,7 +165,7 @@ foreach ($filtered as $item) {
     
     // Récupérer candidats
     $stmt = $pdo->prepare('SELECT c.nom_candidat, COALESCE(r.nombre_votes, 0) as votes, COALESCE(r.pourcentage, 0) as pct 
-        FROM CANDIDATS c LEFT JOIN RESULTATS r ON c.id_candidat = r.id_candidat 
+        FROM candidats c LEFT JOIN resultats r ON c.id_candidat = r.id_candidat 
         WHERE c.id_election = :e 
         ORDER BY COALESCE(r.nombre_votes, 0) DESC');
     $stmt->execute([':e' => $idElection]);

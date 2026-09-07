@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 
 try {
     $pdo = db();
-    $stmt = $pdo->prepare('SELECT id_user, nom, prenom, email FROM USERS WHERE id_user = ?');
+    $stmt = $pdo->prepare('SELECT id_user, nom, prenom, email FROM users WHERE id_user = ?');
     $stmt->execute([$_SESSION['user_id']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {

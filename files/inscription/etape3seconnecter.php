@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $hash = password_hash($password, PASSWORD_DEFAULT);
         try {
             $pdo = db();
-            $stmt = $pdo->prepare("UPDATE USERS SET password_hash = ? WHERE id_user = ?");
+            $stmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id_user = ?");
             $stmt->execute([$hash, $_SESSION['reset_user_id']]);
             
             // Clear session variables

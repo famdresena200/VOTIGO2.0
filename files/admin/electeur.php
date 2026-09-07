@@ -33,7 +33,7 @@ $electeur = null;
 $error = '';
 if ($id > 0) {
     try {
-        $stmt = $pdo->prepare('SELECT id_user, nom, email, prenom, nen, cin, telephone, date_naissance, date_inscription FROM USERS WHERE id_user = :id LIMIT 1');
+        $stmt = $pdo->prepare('SELECT id_user, nom, email, prenom, nen, cin, telephone, date_naissance, date_inscription FROM users WHERE id_user = :id LIMIT 1');
         $stmt->execute([':id' => $id]);
         $electeur = $stmt->fetch() ?: null;
         if (!$electeur) {

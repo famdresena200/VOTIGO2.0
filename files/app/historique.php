@@ -12,11 +12,11 @@ $userName = auth_user_name();
 $votes = [];
 if ($idUser > 0) {
     // Get all elections
-    $elections = $pdo->query('SELECT id_election FROM ELECTIONS')->fetchAll();
+    $elections = $pdo->query('SELECT id_election FROM elections')->fetchAll();
     $votedElections = [];
     foreach ($elections as $e) {
         $token = anon_token($idUser, (int)$e['id_election']);
-        $stmt_check = $pdo->prepare('SELECT v.id_vote, v.date_vote FROM VOTES v WHERE token_anonyme = :t LIMIT 1');
+        $stmt_check = $pdo->prepare('SELECT v.id_vote, v.date_vote FROM votes v WHERE token_anonyme = :t LIMIT 1');
         $stmt_check->execute([':t' => $token]);
         if ($row = $stmt_check->fetch()) {
             $votedElections[] = (int)$e['id_election'];
@@ -33,9 +33,9 @@ if ($idUser > 0) {
         $placeholders = implode(',', array_fill(0, count($userTokens), '?'));
         $stmt = $pdo->prepare(
             "SELECT v.date_vote, e.titre, c.nom_candidat
-             FROM VOTES v
-             JOIN ELECTIONS e ON e.id_election = v.id_election
-             JOIN CANDIDATS c ON c.id_candidat = v.id_candidat
+             FROM votes v
+             JOIN elections e ON e.id_election = v.id_election
+             JOIN candidats c ON c.id_candidat = v.id_candidat
              WHERE v.token_anonyme IN ($placeholders)
              ORDER BY v.date_vote DESC
              LIMIT 30"

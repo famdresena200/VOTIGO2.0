@@ -10,13 +10,13 @@ $pdo = db();
 
 $idElection = isset($_GET['id_election']) ? (int)$_GET['id_election'] : 0;
 if ($idElection > 0) {
-    $stmt = $pdo->prepare('SELECT * FROM ELECTIONS WHERE id_election = :id LIMIT 1');
+    $stmt = $pdo->prepare('SELECT * FROM elections WHERE id_election = :id LIMIT 1');
     $stmt->execute([':id' => $idElection]);
     $election = $stmt->fetch();
 } else {
-    $election = $pdo->query("SELECT * FROM ELECTIONS WHERE statut='actif' ORDER BY date_debut DESC LIMIT 1")->fetch();
+    $election = $pdo->query("SELECT * FROM elections WHERE statut='actif' ORDER BY date_debut DESC LIMIT 1")->fetch();
     if (!$election) {
-        $election = $pdo->query("SELECT * FROM ELECTIONS ORDER BY id_election DESC LIMIT 1")->fetch();
+        $election = $pdo->query("SELECT * FROM elections ORDER BY id_election DESC LIMIT 1")->fetch();
     }
 }
 
@@ -27,16 +27,16 @@ if ($election) {
     $hasOrdre = false;
     $hasNumero = false;
     if ($db !== '') {
-        $st = $pdo->prepare("SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'CANDIDATS' AND COLUMN_NAME = 'ordre'");
+        $st = $pdo->prepare("SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'candidats' AND COLUMN_NAME = 'ordre'");
         $st->execute([$db]);
         $hasOrdre = ((int)($st->fetch()['c'] ?? 0)) === 1;
-        $st2 = $pdo->prepare("SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'CANDIDATS' AND COLUMN_NAME = 'numero'");
+        $st2 = $pdo->prepare("SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'candidats' AND COLUMN_NAME = 'numero'");
         $st2->execute([$db]);
         $hasNumero = ((int)($st2->fetch()['c'] ?? 0)) === 1;
     }
     $sql = $hasOrdre
-        ? ('SELECT id_candidat, nom_candidat, bio, ' . ($hasNumero ? 'numero, ' : '') . 'ordre FROM CANDIDATS WHERE id_election = :id ORDER BY ordre ASC, id_candidat ASC')
-        : ('SELECT id_candidat, nom_candidat, bio, ' . ($hasNumero ? 'numero ' : '') . 'FROM CANDIDATS WHERE id_election = :id ORDER BY id_candidat ASC');
+        ? ('SELECT id_candidat, nom_candidat, bio, ' . ($hasNumero ? 'numero, ' : '') . 'ordre FROM candidats WHERE id_election = :id ORDER BY ordre ASC, id_candidat ASC')
+        : ('SELECT id_candidat, nom_candidat, bio, ' . ($hasNumero ? 'numero ' : '') . 'FROM candidats WHERE id_election = :id ORDER BY id_candidat ASC');
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':id' => (int)$election['id_election']]);
     $candidats = $stmt->fetchAll();

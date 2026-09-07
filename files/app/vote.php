@@ -25,14 +25,14 @@ function recalculate_election_percentages(PDO $pdo, int $idElection): void
 {
     try {
         // Get total votes for this election
-        $stmt = $pdo->prepare('SELECT SUM(nombre_votes) as total FROM RESULTATS WHERE id_election = :e');
+        $stmt = $pdo->prepare('SELECT SUM(nombre_votes) as total FROM resultats WHERE id_election = :e');
         $stmt->execute([':e' => $idElection]);
         $totalVotes = (int)($stmt->fetch()['total'] ?? 0);
 
         if ($totalVotes > 0) {
             // Update percentages for all candidates
             $stmt = $pdo->prepare('
-                UPDATE RESULTATS
+                UPDATE resultats
                 SET pourcentage = ROUND((nombre_votes / :total) * 100, 2)
                 WHERE id_election = :e
             ');
@@ -46,13 +46,13 @@ function recalculate_election_percentages(PDO $pdo, int $idElection): void
 // Élection choisie (via dashboard) ou élection "active", sinon la plus récente.
 $idElectionFromUrl = isset($_GET['id_election']) ? (int)$_GET['id_election'] : 0;
 if ($idElectionFromUrl > 0) {
-    $stmt = $pdo->prepare('SELECT * FROM ELECTIONS WHERE id_election = :id LIMIT 1');
+    $stmt = $pdo->prepare('SELECT * FROM elections WHERE id_election = :id LIMIT 1');
     $stmt->execute([':id' => $idElectionFromUrl]);
     $election = $stmt->fetch();
 } else {
-    $election = $pdo->query("SELECT * FROM ELECTIONS WHERE statut='actif' ORDER BY date_debut DESC LIMIT 1")->fetch();
+    $election = $pdo->query("SELECT * FROM elections WHERE statut='actif' ORDER BY date_debut DESC LIMIT 1")->fetch();
     if (!$election) {
-        $election = $pdo->query("SELECT * FROM ELECTIONS ORDER BY id_election DESC LIMIT 1")->fetch();
+        $election = $pdo->query("SELECT * FROM elections ORDER BY id_election DESC LIMIT 1")->fetch();
     }
 }
 
@@ -65,7 +65,7 @@ if (!$election) {
     $error = "Aucune élection n'est disponible pour le moment.";
 } else {
     $idElection = (int)$election['id_election'];
-    $stmt = $pdo->prepare('SELECT id_candidat, nom_candidat, bio, numero, image_mime FROM CANDIDATS WHERE id_election = :id ORDER BY ordre ASC, id_candidat ASC');
+    $stmt = $pdo->prepare('SELECT id_candidat, nom_candidat, bio, numero, image_mime FROM candidats WHERE id_election = :id ORDER BY ordre ASC, id_candidat ASC');
     $stmt->execute([':id' => $idElection]);
     $candidats = $stmt->fetchAll();
 
@@ -82,7 +82,7 @@ if (!$election) {
     // Detect if the user already voted in this election (via token) for privacy.
     $alreadyVotedCandidateId = 0;
     $token = anon_token($idUser, $idElection);
-    $stmt2 = $pdo->prepare('SELECT id_candidat FROM VOTES WHERE id_election = :e AND token_anonyme = :t LIMIT 1');
+    $stmt2 = $pdo->prepare('SELECT id_candidat FROM votes WHERE id_election = :e AND token_anonyme = :t LIMIT 1');
     $stmt2->execute([':e' => $idElection, ':t' => $token]);
     $alreadyVotedCandidateId = (int)($stmt2->fetchColumn() ?? 0);
     $alreadyVoted = $alreadyVotedCandidateId > 0;
@@ -117,7 +117,7 @@ if (!$election) {
             try {
                 $token = anon_token($idUser, $idElection);
                 try {
-                    $stmt = $pdo->prepare('INSERT INTO VOTES (id_candidat, id_election, id_user, token_anonyme) VALUES (:c, :e, :u, :t)');
+                    $stmt = $pdo->prepare('INSERT INTO votes (id_candidat, id_election, id_user, token_anonyme) VALUES (:c, :e, :u, :t)');
                     $stmt->execute([
                         ':c' => $idCandidat,
                         ':e' => $idElection,
@@ -126,7 +126,7 @@ if (!$election) {
                     ]);
                 } catch (PDOException $e1) {
                     if ((int)($e1->errorInfo[1] ?? 0) === 1054) {
-                        $stmt = $pdo->prepare('INSERT INTO VOTES (id_candidat, id_election, token_anonyme) VALUES (:c, :e, :t)');
+                        $stmt = $pdo->prepare('INSERT INTO votes (id_candidat, id_election, token_anonyme) VALUES (:c, :e, :t)');
                         $stmt->execute([
                             ':c' => $idCandidat,
                             ':e' => $idElection,
@@ -140,7 +140,7 @@ if (!$election) {
                 // Update aggregated results when possible (non-critical for actual vote recording)
                 try {
                     $stmt = $pdo->prepare(
-                        'INSERT INTO RESULTATS (id_election, id_candidat, nombre_votes, pourcentage)
+                        'INSERT INTO resultats (id_election, id_candidat, nombre_votes, pourcentage)
                          VALUES (:e, :c, 1, 0.00)
                          ON DUPLICATE KEY UPDATE nombre_votes = nombre_votes + 1'
                     );
@@ -149,8 +149,8 @@ if (!$election) {
                     // Recalculate percentages for all candidates in this election
                     recalculate_election_percentages($pdo, $idElection);
                 } catch (PDOException $e2) {
-                    // If RESULTATS table/columns are missing or something else went wrong, still allow the vote.
-                    error_log('VOTIGO: unable to update RESULTATS: ' . $e2->getMessage());
+                    // If resultats table/columns are missing or something else went wrong, still allow the vote.
+                    error_log('VOTIGO: unable to update resultats: ' . $e2->getMessage());
                 }
 
                 $success = true;

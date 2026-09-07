@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo = db();
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare('UPDATE USERS SET password_hash = ? WHERE id_user = ?');
+            $stmt = $pdo->prepare('UPDATE users SET password_hash = ? WHERE id_user = ?');
             $stmt->execute([$hash, $reset_data['id_user']]);
 
             // Nettoyage et redirection vers login

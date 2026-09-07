@@ -50,7 +50,7 @@ function election_statut_for_db(PDO $pdo, string $statut): string
     if ($allowed === null) {
         $allowed = [];
         try {
-            $row = $pdo->query("SHOW COLUMNS FROM ELECTIONS LIKE 'statut'")->fetch();
+            $row = $pdo->query("SHOW COLUMNS FROM elections LIKE 'statut'")->fetch();
             $type = (string)($row['Type'] ?? '');
             if (preg_match_all("/'((?:\\\\'|[^'])*)'/", $type, $m)) {
                 $allowed = $m[1];
@@ -123,7 +123,7 @@ function election_can_vote_now(array $election, ?DateTimeInterface $now = null):
 
 function user_vote_candidat_id(PDO $pdo, int $idUser, int $idElection): int
 {
-    $stmt = $pdo->prepare('SELECT id_candidat FROM VOTES WHERE id_election = :e AND token_anonyme = :t LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id_candidat FROM votes WHERE id_election = :e AND token_anonyme = :t LIMIT 1');
     $stmt->execute([
         ':e' => $idElection,
         ':t' => anon_token($idUser, $idElection),
@@ -138,7 +138,7 @@ function user_has_voted(PDO $pdo, int $idUser, int $idElection): bool
 
 function election_count_user_votes(PDO $pdo, int $idUser): int
 {
-    $ids = $pdo->query('SELECT id_election FROM ELECTIONS')->fetchAll(PDO::FETCH_COLUMN);
+    $ids = $pdo->query('SELECT id_election FROM elections')->fetchAll(PDO::FETCH_COLUMN);
     $n = 0;
     foreach ($ids as $id) {
         if (user_has_voted($pdo, $idUser, (int)$id)) {
@@ -151,13 +151,13 @@ function election_count_user_votes(PDO $pdo, int $idUser): int
 function recalculate_election_percentages(PDO $pdo, int $idElection): void
 {
     try {
-        $stmt = $pdo->prepare('SELECT SUM(nombre_votes) as total FROM RESULTATS WHERE id_election = :e');
+        $stmt = $pdo->prepare('SELECT SUM(nombre_votes) as total FROM resultats WHERE id_election = :e');
         $stmt->execute([':e' => $idElection]);
         $totalVotes = (int)($stmt->fetch()['total'] ?? 0);
 
         if ($totalVotes > 0) {
             $stmt = $pdo->prepare(
-                'UPDATE RESULTATS
+                'UPDATE resultats
                  SET pourcentage = ROUND((nombre_votes / :total) * 100, 2)
                  WHERE id_election = :e'
             );

@@ -14,7 +14,7 @@ if (($_GET['action'] ?? '') === 'check_email') {
     if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL)) {
         try {
             $pdo = db();
-            $stmt = $pdo->prepare('SELECT COUNT(*) FROM USERS WHERE email = ?');
+            $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE email = ?');
             $stmt->execute([$email]);
             $exists = $stmt->fetchColumn() > 0;
         } catch (PDOException $e) {
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             $pdo = db();
-            $stmt = $pdo->prepare('SELECT id_user, nom, prenom FROM USERS WHERE email = :email LIMIT 1');
+            $stmt = $pdo->prepare('SELECT id_user, nom, prenom FROM users WHERE email = :email LIMIT 1');
             $stmt->execute([':email' => $email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 

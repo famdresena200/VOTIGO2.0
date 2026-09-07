@@ -31,7 +31,7 @@ function fmt_date_fr(?string $value): string
 
 if ($idElection > 0) {
     try {
-        $stmt = $pdo->prepare('SELECT id_election, titre, description, date_debut, date_fin, statut FROM ELECTIONS WHERE id_election = :e LIMIT 1');
+        $stmt = $pdo->prepare('SELECT id_election, titre, description, date_debut, date_fin, statut FROM elections WHERE id_election = :e LIMIT 1');
         $stmt->execute([':e' => $idElection]);
         $election = $stmt->fetch() ?: null;
         if (!$election) {
@@ -41,19 +41,19 @@ if ($idElection > 0) {
             $db = (string)($pdo->query('SELECT DATABASE() AS d')->fetch()['d'] ?? '');
             $hasOrdre = false;
             if ($db !== '') {
-                $st = $pdo->prepare("SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'CANDIDATS' AND COLUMN_NAME = 'ordre'");
+                $st = $pdo->prepare("SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'candidats' AND COLUMN_NAME = 'ordre'");
                 $st->execute([$db]);
                 $hasOrdre = ((int)($st->fetch()['c'] ?? 0)) === 1;
             }
             $dbHasNumero = false;
             if ($db !== '') {
-                $st2 = $pdo->prepare("SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'CANDIDATS' AND COLUMN_NAME = 'numero'");
+                $st2 = $pdo->prepare("SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'candidats' AND COLUMN_NAME = 'numero'");
                 $st2->execute([$db]);
                 $dbHasNumero = ((int)($st2->fetch()['c'] ?? 0)) === 1;
             }
             $sql = $hasOrdre
-                ? ('SELECT id_candidat, nom_candidat, bio, ' . ($dbHasNumero ? 'numero, ' : '') . 'ordre, image_mime FROM CANDIDATS WHERE id_election = :e ORDER BY ordre ASC, id_candidat ASC')
-                : ('SELECT id_candidat, nom_candidat, bio, ' . ($dbHasNumero ? 'numero, ' : '') . 'image_mime FROM CANDIDATS WHERE id_election = :e ORDER BY id_candidat ASC');
+                ? ('SELECT id_candidat, nom_candidat, bio, ' . ($dbHasNumero ? 'numero, ' : '') . 'ordre, image_mime FROM candidats WHERE id_election = :e ORDER BY ordre ASC, id_candidat ASC')
+                : ('SELECT id_candidat, nom_candidat, bio, ' . ($dbHasNumero ? 'numero, ' : '') . 'image_mime FROM candidats WHERE id_election = :e ORDER BY id_candidat ASC');
             $stmt = $pdo->prepare($sql);
             $stmt->execute([':e' => $idElection]);
             $candidats = $stmt->fetchAll();

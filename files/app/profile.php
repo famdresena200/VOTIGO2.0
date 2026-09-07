@@ -11,7 +11,7 @@ $userName = auth_user_name();
 $pdo = db();
 
 // Get user info
-$stmt = $pdo->prepare('SELECT id_user, nom, email, nen, cin, telephone, date_naissance FROM USERS WHERE id_user = :id LIMIT 1');
+$stmt = $pdo->prepare('SELECT id_user, nom, email, nen, cin, telephone, date_naissance FROM users WHERE id_user = :id LIMIT 1');
 $stmt->execute([':id' => $idUser]);
 $user = $stmt->fetch();
 
@@ -23,11 +23,11 @@ if (!$user) {
 // Get voting stats
 $stmt = $pdo->prepare('
     SELECT COUNT(DISTINCT id_election) as total_votes
-    FROM VOTES 
+    FROM votes 
     WHERE token_anonyme IN (
-        SELECT token_anonyme FROM VOTES 
+        SELECT token_anonyme FROM votes 
         WHERE id_election IN (
-            SELECT id_election FROM ELECTIONS
+            SELECT id_election FROM elections
         )
     )
 ');

@@ -31,7 +31,7 @@ try {
     echo "✓ Utilisateur: $userName (ID: $idUser)\n";
 
     // Tester avec une élection existante
-    $stmt = $pdo->query('SELECT id_election, titre, statut FROM ELECTIONS LIMIT 5');
+    $stmt = $pdo->query('SELECT id_election, titre, statut FROM elections LIMIT 5');
     $elections = $stmt->fetchAll();
 
     echo "\nÉlections disponibles:\n";
@@ -44,7 +44,7 @@ try {
         echo "\n=== Test avec élection ID: $testElectionId ===\n";
 
         // Simuler la logique de results.php
-        $election = $pdo->prepare('SELECT * FROM ELECTIONS WHERE id_election = :id LIMIT 1');
+        $election = $pdo->prepare('SELECT * FROM elections WHERE id_election = :id LIMIT 1');
         $election->execute([':id' => $testElectionId]);
         $election = $election->fetch();
 
@@ -54,13 +54,13 @@ try {
             echo "✓ Élection trouvée: {$election['titre']}\n";
 
             // Tester les candidats
-            $candidats = $pdo->prepare('SELECT COUNT(*) as count FROM CANDIDATS WHERE id_election = :id');
+            $candidats = $pdo->prepare('SELECT COUNT(*) as count FROM candidats WHERE id_election = :id');
             $candidats->execute([':id' => $testElectionId]);
             $count = $candidats->fetch()['count'];
             echo "✓ Candidats: $count\n";
 
             // Tester les résultats
-            $results = $pdo->prepare('SELECT COUNT(*) as count FROM RESULTATS WHERE id_election = :id');
+            $results = $pdo->prepare('SELECT COUNT(*) as count FROM resultats WHERE id_election = :id');
             $results->execute([':id' => $testElectionId]);
             $count = $results->fetch()['count'];
             echo "✓ Résultats en BD: $count\n";
@@ -75,7 +75,7 @@ try {
                 echo "Test du calcul des résultats...\n";
                 try {
                     // Test simple d'abord
-                    $stmt = $pdo->prepare('SELECT COUNT(*) as count FROM CANDIDATS WHERE id_election = ?');
+                    $stmt = $pdo->prepare('SELECT COUNT(*) as count FROM candidats WHERE id_election = ?');
                     $stmt->execute([$testElectionId]);
                     $candidatCount = $stmt->fetch()['count'];
                     echo "✓ Nombre de candidats: $candidatCount\n";
@@ -85,8 +85,8 @@ try {
                         SELECT c.id_candidat, c.nom_candidat, c.bio, c.numero, c.image_mime,
                                COALESCE(r.nombre_votes, 0) as votes,
                                COALESCE(r.pourcentage, 0) as percentage
-                        FROM CANDIDATS c
-                        LEFT JOIN RESULTATS r ON c.id_candidat = r.id_candidat AND r.id_election = ?
+                        FROM candidats c
+                        LEFT JOIN resultats r ON c.id_candidat = r.id_candidat AND r.id_election = ?
                         WHERE c.id_election = ?
                         ORDER BY COALESCE(r.nombre_votes, 0) DESC, c.ordre ASC, c.id_candidat ASC
                     ');

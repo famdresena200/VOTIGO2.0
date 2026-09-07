@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         try {
             $pdo = db();
-            $stmt = $pdo->prepare("SELECT id_user, nom, prenom, password_hash FROM USERS WHERE nen = ?");
+            $stmt = $pdo->prepare("SELECT id_user, nom, prenom, password_hash FROM users WHERE nen = ?");
             $stmt->execute([$numero_electeur]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 

@@ -23,14 +23,14 @@ $userName = auth_user_name();
 $now = new DateTime();
 
 // Récupérer toutes les élections
-$elections = $pdo->query("SELECT id_election, titre, description, statut, date_fin, date_debut FROM ELECTIONS 
+$elections = $pdo->query("SELECT id_election, titre, description, statut, date_fin, date_debut FROM elections 
           ORDER BY date_fin DESC LIMIT 20")->fetchAll();
 
 // Check which elections the user has already voted in and get their choice
 $votedElections = [];
 $userVoteChoices = []; // id_election => nom_candidat
 if ($idUser > 0) {
-    $stmt = $pdo->prepare('SELECT DISTINCT id_election FROM VOTES WHERE token_anonyme = ?');
+    $stmt = $pdo->prepare('SELECT DISTINCT id_election FROM votes WHERE token_anonyme = ?');
     foreach ($elections as $e) {
         $token = anon_token($idUser, (int)$e['id_election']);
         $stmt->execute([$token]);
@@ -39,8 +39,8 @@ if ($idUser > 0) {
             
             // Get the candidate name they voted for
             $stmtCandidat = $pdo->prepare(
-                'SELECT c.nom_candidat FROM CANDIDATS c 
-                 INNER JOIN VOTES v ON c.id_candidat = v.id_candidat 
+                'SELECT c.nom_candidat FROM candidats c 
+                 INNER JOIN votes v ON c.id_candidat = v.id_candidat 
                  WHERE v.token_anonyme = ? AND v.id_election = ?'
             );
             $stmtCandidat->execute([$token, (int)$e['id_election']]);

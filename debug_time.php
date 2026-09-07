@@ -24,7 +24,7 @@ echo "  Formatted: " . $row['formatted'] . "\n\n";
 
 // Élections
 echo "Élections:\n";
-$stmt = $pdo->query("SELECT id_election, titre, date_debut, date_fin, statut FROM ELECTIONS LIMIT 5");
+$stmt = $pdo->query("SELECT id_election, titre, date_debut, date_fin, statut FROM elections LIMIT 5");
 $elections = $stmt->fetchAll();
 
 foreach ($elections as $e) {
