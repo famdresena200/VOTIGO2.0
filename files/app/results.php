@@ -86,10 +86,10 @@ if ($idElection > 0) {
         error_log('Calcul résultats: ' . $ex->getMessage());
     }
 
-    // Vérifier si l'utilisateur a voté et récupérer son choix
+    // Vérifier si l'utilisateur a voté sans exposer son identité dans la table des votes.
     $userVote = null;
-    $stmt = $pdo->prepare('SELECT id_candidat FROM votes WHERE id_election = :e AND id_user = :u LIMIT 1');
-    $stmt->execute([':e' => $idElection, ':u' => $idUser]);
+    $stmt = $pdo->prepare('SELECT id_candidat FROM votes WHERE id_election = :e AND token_anonyme = :t LIMIT 1');
+    $stmt->execute([':e' => $idElection, ':t' => anon_token_result($idUser, $idElection)]);
     $voteRow = $stmt->fetch();
     if ($voteRow) {
         $userVote = (int)$voteRow['id_candidat'];
@@ -321,9 +321,9 @@ if (empty($elections)) {
             $statusIcon = '❓';
         }
 
-        // Vérifier si l'utilisateur a voté
-        $stmt = $pdo->prepare('SELECT COUNT(*) as has_voted FROM votes WHERE id_election = :e AND id_user = :u');
-        $stmt->execute([':e' => $e['id_election'], ':u' => $idUser]);
+        // Vérifier le vote avec le token anonyme utilisé par la table votes.
+        $stmt = $pdo->prepare('SELECT COUNT(*) as has_voted FROM votes WHERE id_election = :e AND token_anonyme = :t');
+        $stmt->execute([':e' => $e['id_election'], ':t' => anon_token_result($idUser, (int)$e['id_election'])]);
         $hasVoted = (bool)$stmt->fetch()['has_voted'];
 
         echo '<div class="card" style="transition:all .2s ease"><div class="bd" style="padding:20px">';

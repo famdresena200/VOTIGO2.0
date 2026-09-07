@@ -1,23 +1,9 @@
 USE BDVOTIGO;
 
-INSERT INTO ELECTEURS_AUTORISES (nom, prenom, cin, nen) VALUES
-('Rakoto', 'Aina', '100000000001', '0000000001'),
-('Rasoa', 'Benoit', '100000000002', '0000000002'),
-('Andrianina', 'Clara', '100000000003', '0000000003'),
-('Razafindrakoto', 'Dany', '100000000004', '0000000004'),
-('Manjaka', 'Elie', '100000000005', '0000000005'),
-('Randriamampy', 'Fanja', '100000000006', '0000000006'),
-('Nirina', 'Gaëlle', '100000000007', '0000000007'),
-('Rabe', 'Hary', '100000000008', '0000000008'),
-('Andriamihaja', 'Isma', '100000000009', '0000000009'),
-('Ravelo', 'Joël', '100000000010', '0000000010'),
-('Miarisoa', 'Koto', '100000000011', '0000000011'),
-('Lalao', 'Lova', '100000000012', '0000000012'),
-('Rangy', 'Mialy', '100000000013', '0000000013'),
-('Solofon', 'Noro', '100000000014', '0000000014'),
-('Tiana', 'Onja', '100000000015', '0000000015'),
-('Fidèle', 'Pao', '100000000016', '0000000016'),
-('Hanitra', 'Quentin', '100000000017', '0000000017'),
-('Tojo', 'Rina', '100000000018', '0000000018'),
-('Mamy', 'Soa', '100000000019', '0000000019'),
-('Bertin', 'Tovo', '100000000020', '0000000020');
+INSERT INTO electeurs_autorises (nom, prenom, cin, nen) VALUES
+('RAZAFIMAHAFALY ANDRIAMISAINA', 'Fandresena Iddo Herimann', '100000000019', '0000000019'),
+('RATOVONIRINA', 'Nomena Fitahiana Mahery', '100000000020', '0000000020'),
+('KOLOINAHARITIANA', 'Fifaliana', '100000000021', '0000000021'),
+('RATOARIVONY', 'Narovantsoa', '100000000022', '0000000022'),
+('RAMAHERISON', 'Mamy Antso', '100000000023', '0000000023')
+;
