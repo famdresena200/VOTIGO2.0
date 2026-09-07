@@ -75,6 +75,7 @@ function votigo_layout_start(string $title, string $active, array $opts = []): v
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/jpeg" href="<?= htmlspecialchars($logo, ENT_QUOTES, 'UTF-8') ?>" />
   <title><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></title>
   <link rel="stylesheet" href="../../CSS/votigo.css" />
   <script defer src="../../JS/votigo.js"></script>
@@ -161,6 +162,7 @@ function votigo_layout_start(string $title, string $active, array $opts = []): v
 
     <main class="content">
       <header class="topbar">
+        <img class="topbar-logo" src="<?= htmlspecialchars($logo, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($logoAlt, ENT_QUOTES, 'UTF-8') ?>" />
         <div class="chip">
           <span class="ico" style="width:18px;height:18px"><?= $badgeIco ?></span>
           <span><?= htmlspecialchars($badge, ENT_QUOTES, 'UTF-8') ?></span>

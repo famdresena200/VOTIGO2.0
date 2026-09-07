@@ -46,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <link rel="icon" type="image/jpeg" href="../../images/IMG-20260127-WA0054.jpg" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Réinitialisation du mot de passe — VOTIGO</title>

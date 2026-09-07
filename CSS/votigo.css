@@ -190,6 +190,15 @@ a{color:inherit}
   position:relative;
   z-index:2;
 }
+.topbar-logo{
+  width:auto;
+  height:42px;
+  max-width:180px;
+  object-fit:contain;
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,.16);
+}
 .topbar .spacer{margin-left:auto}
 .chip{
   display:inline-flex;align-items:center;gap:8px;
@@ -346,6 +355,24 @@ select option{
   display:grid;place-items:center;
   font-weight:900;
 }
+.result-choice-badge{
+  position:absolute;
+  top:8px;
+  right:8px;
+  max-width:calc(100% - 16px);
+  padding:3px 8px;
+  border-radius:12px;
+  background:#60a5fa;
+  color:#000;
+  font-size:10px;
+  font-weight:700;
+  line-height:1.2;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.result-candidate.is-user-choice{
+  padding-top:32px !important;
+}
 
 @media (max-width: 980px){
   .app{width:100%; display:flex; flex-direction:column}
@@ -432,5 +459,49 @@ select option{
   input,select,textarea{padding:10px 12px;border-radius:10px;font-size:13px}
   label{font-size:11px;margin:0 0 4px}
   .sidebar-footer .small{font-size:10px;line-height:1.3;margin-top:6px}
+  .results-detail-layout{
+    grid-template-columns:1fr !important;
+    gap:18px !important;
+    align-items:stretch !important;
+  }
+  .results-detail-layout > div:first-child > div{
+    width:min(100%, 240px) !important;
+    height:auto !important;
+    aspect-ratio:1;
+  }
+  .results-detail-layout > div:first-child > div > div{
+    width:65% !important;
+    height:65% !important;
+  }
+  .result-candidate{
+    align-items:flex-start !important;
+    gap:10px;
+    margin-bottom:12px !important;
+    padding:10px !important;
+  }
+  .result-candidate.is-user-choice{
+    padding-top:30px !important;
+  }
+  .result-choice-badge{
+    top:7px;
+    right:7px;
+    font-size:9px;
+  }
+  .result-candidate-info{
+    min-width:0;
+  }
+  .result-candidate-info > div:first-child{
+    overflow-wrap:anywhere;
+    line-height:1.25;
+  }
+  .result-percentage{
+    flex:0 0 68px;
+    min-width:68px;
+    padding-top:2px;
+  }
+  .result-percentage > div{
+    font-size:18px !important;
+    white-space:nowrap;
+  }
 }
 

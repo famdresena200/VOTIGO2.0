@@ -128,7 +128,7 @@ if ($idElection > 0) {
     }
     echo '</div>';
 
-    echo '<div style="display:grid;grid-template-columns:350px 1fr;gap:40px;align-items:center">';
+    echo '<div class="results-detail-layout" style="display:grid;grid-template-columns:350px 1fr;gap:40px;align-items:center">';
 
     // Générer des couleurs dynamiques basées sur HSL
     function generateColorHSL($index, $total) {
@@ -178,18 +178,19 @@ if ($idElection > 0) {
 
         $extraStyle = $isUserChoice ? 'border-left:3px solid #60a5fa;background:rgba(96,165,250,.1);box-shadow:0 0 0 1px rgba(96,165,250,.2)' : 'border-left:3px solid ' . $color;
 
-        echo '<div style="display:flex;align-items:center;margin-bottom:20px;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;' . $extraStyle . ';position:relative">';
+        $choiceClass = $isUserChoice ? ' is-user-choice' : '';
+        echo '<div class="result-candidate' . $choiceClass . '" style="display:flex;align-items:center;margin-bottom:20px;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;' . $extraStyle . ';position:relative">';
 
         if ($isUserChoice) {
-            echo '<div style="position:absolute;top:-8px;right:-8px;background:#60a5fa;color:#000;padding:4px 8px;border-radius:12px;font-size:10px;font-weight:700;text-transform:uppercase">Votre choix</div>';
+            echo '<div class="result-choice-badge">Votre choix</div>';
         }
 
         echo '<div style="width:20px;height:20px;border-radius:4px;background:' . $color . ';flex-shrink:0;margin-right:12px"></div>';
-        echo '<div style="flex:1">';
+        echo '<div class="result-candidate-info" style="flex:1">';
         echo '<div style="font-weight:700;font-size:15px">' . htmlspecialchars($c['nom_candidat']) . '</div>';
         echo '<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">' . (int)$c['votes'] . ' votes</div>';
         echo '</div>';
-        echo '<div style="text-align:right">';
+        echo '<div class="result-percentage" style="text-align:right">';
         echo '<div style="font-weight:900;font-size:20px;color:' . $color . '">' . $c['pct'] . '%</div>';
         echo '</div>';
         echo '</div>';

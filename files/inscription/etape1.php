@@ -33,6 +33,17 @@ function is_valid_cin(string $value): bool
     return preg_match('/^\d{12}$/', $value) === 1 && (int)$value > 0;
 }
 
+function is_at_least_18_years_old(string $birthDate): bool
+{
+    $date = DateTime::createFromFormat('!Y-m-d', $birthDate);
+    if (!$date || $date->format('Y-m-d') !== $birthDate) {
+        return false;
+    }
+
+    $today = new DateTime('today');
+    return $date <= $today->modify('-18 years');
+}
+
 function is_elector_authorized(PDO $pdo, string $cin, string $nen, string $nom, string $prenom): bool
 {
     $stmt = $pdo->prepare(
@@ -110,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $consent = isset($_POST['consent']) ? 1 : 0;
 
     // Validation complète - tous les champs requis
-    if (empty($nom) || empty($prenom) || empty($email) || empty($nen) || empty($cin)) {
+    if (empty($nom) || empty($prenom) || empty($email) || empty($nen) || empty($cin) || empty($date_naissance)) {
         $error = "Veuillez remplir tous les champs requis.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = "Adresse email invalide.";
@@ -118,6 +129,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Le numéro d'électeur doit comporter exactement 10 chiffres et être valide.";
     } elseif (!is_valid_cin($cin)) {
         $error = "Le numéro CIN doit comporter exactement 12 chiffres et être valide.";
+    } elseif (!is_at_least_18_years_old($date_naissance)) {
+        $error = "Vous devez avoir au moins 18 ans pour vous inscrire.";
     } elseif (!empty($telephone) && strlen(preg_replace('/\D/', '', $telephone)) !== 10) {
         $error = "Le numéro de téléphone doit comporter exactement 10 chiffres.";
     } elseif ($consent !== 1) {
@@ -175,6 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/jpeg" href="../../images/IMG-20260127-WA0054.jpg" />
     <title>Inscription Électeur — VOTIGO</title>
 
     <style>
@@ -372,8 +386,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="row">
                         <div>
-                            <label for="dob">Date de Naissance</label>
-                            <input id="dob" name="dob" type="date" />
+                            <label for="dob">Date de Naissance *</label>
+                            <input id="dob" name="dob" type="date" required max="<?= htmlspecialchars((new DateTime('today'))->modify('-18 years')->format('Y-m-d'), ENT_QUOTES, 'UTF-8') ?>" />
+                            <span id="dob-msg" class="input-msg info">Vous devez avoir au moins 18 ans</span>
                         </div>
                     </div>
 
@@ -426,7 +441,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             var nenInput = document.getElementById('nen');
             var cinInput = document.getElementById('cin');
             var telInput = document.getElementById('telephone');
+            var dobInput = document.getElementById('dob');
+            var dobMsg = document.getElementById('dob-msg');
             var consentCheckbox = document.getElementById('consent');
+
+            function checkBirthDate() {
+                var value = dobInput.value;
+                if (!value) {
+                    dobMsg.textContent = 'Date de naissance requise';
+                    dobMsg.className = 'input-msg info';
+                    return;
+                }
+
+                if (value > dobInput.max) {
+                    dobMsg.textContent = 'Vous devez avoir au moins 18 ans';
+                    dobMsg.className = 'input-msg error';
+                    return;
+                }
+
+                dobMsg.textContent = '✓ Âge valide';
+                dobMsg.className = 'input-msg success';
+            }
 
             function checkUnique(field, type) {
                 var msg = document.getElementById(field + '-msg');
@@ -515,6 +550,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             nenInput.addEventListener('input', debounce(() => checkUnique('nen', 'nen'), 500));
             cinInput.addEventListener('input', debounce(() => checkUnique('cin', 'cin'), 500));
             telInput.addEventListener('input', debounce(() => checkUnique('tel', 'tel'), 500));
+            dobInput.addEventListener('input', checkBirthDate);
+            dobInput.addEventListener('change', checkBirthDate);
 
             // Focus clear
             form.querySelectorAll('input').forEach(function(input){

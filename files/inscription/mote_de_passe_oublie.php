@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html lang="fr">
 
 <head>
+    <link rel="icon" type="image/jpeg" href="../../images/IMG-20260127-WA0054.jpg" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VOTIGO - Mot de passe oublié</title>
