@@ -10,13 +10,14 @@ function db(): PDO
 
     // XAMPP par défaut : user=root, password vide.
     // Adaptez si besoin.
-    $host = '127.0.0.1';
-    $dbname = 'bdvotigo';
-    $user = 'root';
-    $pass = '';
+    $host = getenv('DB_HOST') ?: '127.0.0.1';
+    $dbname = getenv('DB_NAME') ?: 'bdvotigo';
+    $user = getenv('DB_USER') ?: 'root';
+    $pass = getenv('DB_PASSWORD') ?: '';
+    $port = getenv('DB_PORT') ?: '3306';
     $charset = 'utf8mb4';
 
-    $dsn = "mysql:host={$host};dbname={$dbname};charset={$charset}";
+    $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset={$charset}";
     $options = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
