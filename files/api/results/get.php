@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../api/_config.php';
-require_once __DIR__ . '/../api/_response.php';
+require_once __DIR__ . '/../_config.php';
+require_once __DIR__ . '/../_response.php';
 
 /**
  * GET /api/results/get?id_election=1
