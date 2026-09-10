@@ -106,6 +106,10 @@ if (($_POST['action'] ?? '') === 'update_candidat') {
             $imageData = null;
             $hasNewImage = false;
 
+            if (is_array($image) && isset($image['error']) && (int)$image['error'] !== UPLOAD_ERR_NO_FILE && (int)$image['error'] !== UPLOAD_ERR_OK) {
+                throw new RuntimeException('Échec du téléversement de la photo (code ' . (int)$image['error'] . ').');
+            }
+
             if (is_array($image) && isset($image['tmp_name']) && (int)($image['error'] ?? 0) === UPLOAD_ERR_OK) {
                 $tmp = (string)$image['tmp_name'];
                 $size = (int)($image['size'] ?? 0);
@@ -207,6 +211,10 @@ if (($_POST['action'] ?? '') === 'add_candidat') {
             $imageMime = null;
             $imageSize = null;
             $imageData = null;
+
+            if (is_array($image) && isset($image['error']) && (int)$image['error'] !== UPLOAD_ERR_NO_FILE && (int)$image['error'] !== UPLOAD_ERR_OK) {
+                throw new RuntimeException('Échec du téléversement de la photo (code ' . (int)$image['error'] . ').');
+            }
 
             if (!$hasImageCols && is_array($image) && isset($image['tmp_name']) && (int)($image['error'] ?? 0) === UPLOAD_ERR_OK) {
                 throw new RuntimeException("Fonctionnalité indisponible pour le moment.");

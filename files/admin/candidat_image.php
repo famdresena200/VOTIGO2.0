@@ -15,15 +15,21 @@ try {
     $stmt = $pdo->prepare('SELECT image_mime, image_data FROM candidats WHERE id_candidat = :id LIMIT 1');
     $stmt->execute([':id' => $id]);
     $row = $stmt->fetch();
-    if (!$row || empty($row['image_mime']) || empty($row['image_data'])) {
+    $mime = (string)($row['image_mime'] ?? '');
+    $data = $row['image_data'] ?? null;
+    $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (!in_array($mime, $allowedMimes, true) || !is_string($data) || strlen($data) === 0) {
         http_response_code(404);
         exit;
     }
 
-    header('Content-Type: ' . (string)$row['image_mime']);
+    header('Content-Type: ' . $mime);
+    header('Content-Length: ' . (string)strlen($data));
     header('Cache-Control: private, max-age=3600');
-    echo $row['image_data'];
+    echo $data;
 } catch (Throwable $e) {
+    error_log('VOTIGO: candidate image error: ' . $e->getMessage());
     http_response_code(500);
     exit;
 }

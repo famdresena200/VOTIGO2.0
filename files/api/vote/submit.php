@@ -63,6 +63,10 @@ try {
     if (!$election) {
         api_error('Election not found', 404);
     }
+
+    if ((string)$election['statut'] !== 'actif') {
+        api_error('Election is not active', 403, ['election' => 'Cette élection n’est pas ouverte aux votes.']);
+    }
     
     // Check if election is still open
     $now = new DateTime();
@@ -94,17 +98,21 @@ try {
             ['vote' => 'You have already voted in this election']);
     }
     
-    // Register vote
-    $stmt = $pdo->prepare(
-        'INSERT INTO votes (id_candidat, id_election, token_anonyme, date_vote)
-         VALUES (:id_candidat, :id_election, :token_anonyme, NOW())'
-    );
-    
-    $stmt->execute([
-        ':id_candidat' => $id_candidat,
-        ':id_election' => $id_election,
-        ':token_anonyme' => $token,
-    ]);
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare(
+            'INSERT INTO votes (id_candidat, id_election, token_anonyme, date_vote)
+             VALUES (:id_candidat, :id_election, :token_anonyme, NOW())'
+        );
+        $stmt->execute([
+            ':id_candidat' => $id_candidat,
+            ':id_election' => $id_election,
+            ':token_anonyme' => $token,
+        ]);
+    } catch (Throwable $voteError) {
+        $pdo->rollBack();
+        throw $voteError;
+    }
     
     $voteId = (int)$pdo->lastInsertId();
     
@@ -140,6 +148,8 @@ try {
         ':nombre_votes' => $voteCount,
         ':pourcentage' => $percentage,
     ]);
+
+    $pdo->commit();
     
     api_success([
         'id_vote' => $voteId,
