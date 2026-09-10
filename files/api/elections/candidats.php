@@ -60,7 +60,7 @@ try {
     
     // Get candidates
     $stmt = $pdo->prepare(
-        'SELECT id_candidat, nom_candidat, bio, numero, ordre, image_filename 
+        'SELECT id_candidat, nom_candidat, bio, numero, ordre, image_filename, image_mime 
          FROM candidats 
          WHERE id_election = ? 
          ORDER BY ordre ASC'
@@ -84,6 +84,9 @@ try {
                 'bio' => $c['bio'],
                 'numero' => $c['numero'],
                 'image_filename' => $c['image_filename'],
+                'image_url' => !empty($c['image_mime'])
+                    ? '/files/admin/candidat_image.php?id=' . (int)$c['id_candidat']
+                    : null,
             ];
         }, $candidats),
     ], 'Candidates retrieved', 200);
