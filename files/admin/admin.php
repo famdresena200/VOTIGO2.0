@@ -978,6 +978,43 @@ votigo_layout_start('Administration — VOTIGO', 'admin', [
 
 <script>
   (function(){
+    const form = document.querySelector('form[enctype="multipart/form-data"]');
+    const input = form && form.querySelector('input[type="file"][name="image"]');
+    if (!form || !input) return;
+
+    form.addEventListener('submit', async (event) => {
+      const file = input.files && input.files[0];
+      if (!file || file.size <= 1500000 || !file.type.startsWith('image/')) return;
+
+      event.preventDefault();
+      try {
+        const image = await new Promise((resolve, reject) => {
+          const element = new Image();
+          element.onload = () => resolve(element);
+          element.onerror = reject;
+          element.src = URL.createObjectURL(file);
+        });
+        const scale = Math.min(1, 1600 / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.82));
+        if (!blob) throw new Error('Compression impossible');
+        const compressed = new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', {type: 'image/jpeg'});
+        const transfer = new DataTransfer();
+        transfer.items.add(compressed);
+        input.files = transfer.files;
+        HTMLFormElement.prototype.submit.call(form);
+      } catch (error) {
+        form.submit();
+      }
+    });
+  })();
+</script>
+
+<script>
+  (function(){
     const start = document.getElementById('date_debut');
     const end = document.getElementById('date_fin');
     const activateNow = document.getElementById('activateNow');
