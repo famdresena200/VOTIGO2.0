@@ -82,8 +82,13 @@ if (!$election) {
     // Detect if the user already voted in this election (via token) for privacy.
     $alreadyVotedCandidateId = 0;
     $token = anon_token($idUser, $idElection);
-    $stmt2 = $pdo->prepare('SELECT id_candidat FROM votes WHERE id_election = :e AND token_anonyme = :t LIMIT 1');
-    $stmt2->execute([':e' => $idElection, ':t' => $token]);
+    $hasUserColumn = (bool)$pdo->query("SHOW COLUMNS FROM votes LIKE 'id_user'")->fetch();
+    $stmt2 = $hasUserColumn
+      ? $pdo->prepare('SELECT id_candidat FROM votes WHERE id_election = :e AND (token_anonyme = :t OR id_user = :u) LIMIT 1')
+      : $pdo->prepare('SELECT id_candidat FROM votes WHERE id_election = :e AND token_anonyme = :t LIMIT 1');
+    $hasUserColumn
+      ? $stmt2->execute([':e' => $idElection, ':t' => $token, ':u' => $idUser])
+      : $stmt2->execute([':e' => $idElection, ':t' => $token]);
     $alreadyVotedCandidateId = (int)($stmt2->fetchColumn() ?? 0);
     $alreadyVoted = $alreadyVotedCandidateId > 0;
 

@@ -72,6 +72,15 @@ function anon_token(int $idUser, int $idElection): string {
     return hash_hmac('sha256', $idUser . ':' . $idElection, vote_secret());
 }
 
+function votes_has_user_column(PDO $pdo): bool {
+    static $hasColumn = null;
+    if ($hasColumn === null) {
+        $stmt = $pdo->query("SHOW COLUMNS FROM votes LIKE 'id_user'");
+        $hasColumn = (bool)$stmt->fetch();
+    }
+    return $hasColumn;
+}
+
 /**
  * Get Authorization header (Bearer token)
  */
