@@ -79,8 +79,8 @@ try {
         $pdo->beginTransaction();
         
         $stmt = $pdo->prepare(
-            'INSERT INTO users (nom, prenom, email, cin, nen, date_naissance, password_hash, date_inscription)
-             VALUES (:nom, :prenom, :email, :cin, :nen, :date_naissance, :password_hash, NOW())'
+            'INSERT INTO users (nom, prenom, email, cin, nen, telephone, date_naissance, password_hash, date_inscription)
+             VALUES (:nom, :prenom, :email, :cin, :nen, :telephone, :date_naissance, :password_hash, NOW())'
         );
         
         $stmt->execute([
@@ -89,6 +89,7 @@ try {
             ':email' => $sessionData['email'],
             ':cin' => $sessionData['cin'],
             ':nen' => $sessionData['nen'],
+            ':telephone' => $sessionData['telephone'] ?? '',
             ':date_naissance' => $sessionData['date_naissance'],
             ':password_hash' => $passwordHash,
         ]);

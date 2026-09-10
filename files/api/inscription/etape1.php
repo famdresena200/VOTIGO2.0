@@ -52,6 +52,7 @@ try {
     $nom = (string)$data['nom'];
     $prenom = (string)$data['prenom'];
     $email = (string)$data['email'];
+    $telephone = normalize_identifier((string)($data['telephone'] ?? ''));
     $date_naissance = (string)$data['date_naissance'];
     
     // Validate formats
@@ -67,6 +68,10 @@ try {
     
     if (!validate_email($email)) {
         $errors['email'] = 'Invalid email format';
+    }
+
+    if ($telephone !== '' && !preg_match('/^\d{10}$/', $telephone)) {
+        $errors['telephone'] = 'Le téléphone doit contenir exactement 10 chiffres.';
     }
     
     if (!is_at_least_18_years_old($date_naissance)) {
@@ -125,6 +130,7 @@ try {
         'nom' => $nom,
         'prenom' => $prenom,
         'email' => $email,
+        'telephone' => $telephone,
         'date_naissance' => $date_naissance,
         'otp' => $otp,
         'otp_attempts' => 0,

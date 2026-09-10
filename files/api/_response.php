@@ -89,8 +89,8 @@ function validate_password(string $value): array {
     if (!preg_match('/[0-9]/', $value)) {
         $errors[] = 'Password must contain at least one digit';
     }
-    if (!preg_match('/[!@#$%^&*(),.?":{}|<>]/', $value)) {
-        $errors[] = 'Password must contain at least one special character';
+    if (!preg_match('/[!@#$%]/', $value)) {
+        $errors[] = 'Password must contain at least one special character (!@#$%)';
     }
     return $errors;
 }
