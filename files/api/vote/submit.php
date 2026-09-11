@@ -155,8 +155,8 @@ try {
         'INSERT INTO resultats (id_election, id_candidat, nombre_votes, pourcentage)
          VALUES (:id_election, :id_candidat, :nombre_votes, :pourcentage)
          ON DUPLICATE KEY UPDATE 
-         nombre_votes = :nombre_votes,
-         pourcentage = :pourcentage'
+            nombre_votes = VALUES(nombre_votes),
+            pourcentage = VALUES(pourcentage)'
     );
     
     $stmt->execute([
