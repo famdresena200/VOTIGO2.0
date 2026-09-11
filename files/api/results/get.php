@@ -37,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 try {
+    $user = require_auth();
     $id_election = (int)($_GET['id_election'] ?? 0);
     
     if ($id_election <= 0) {
@@ -44,6 +45,22 @@ try {
     }
     
     $pdo = api_db();
+
+    $userVoteCandidateId = null;
+    $userVoteCandidateName = null;
+    $userVoteToken = anon_token((int)$user['id_user'], $id_election);
+    $stmt = $pdo->prepare(
+        'SELECT v.id_candidat, c.nom_candidat
+         FROM votes v
+         INNER JOIN candidats c ON c.id_candidat = v.id_candidat
+         WHERE v.id_election = ? AND v.token_anonyme = ?
+         LIMIT 1'
+    );
+    $stmt->execute([$id_election, $userVoteToken]);
+    if ($vote = $stmt->fetch()) {
+        $userVoteCandidateId = (int)$vote['id_candidat'];
+        $userVoteCandidateName = $vote['nom_candidat'];
+    }
     
     // Get election info
     $stmt = $pdo->prepare(
@@ -90,6 +107,10 @@ try {
             'statut' => $election['statut'],
         ],
         'total_votes' => $totalVotes,
+        'user_vote' => $userVoteCandidateId === null ? null : [
+            'id_candidat' => $userVoteCandidateId,
+            'nom_candidat' => $userVoteCandidateName,
+        ],
         'results' => array_map(function($r) {
             return [
                 'id_candidat' => (int)$r['id_candidat'],
